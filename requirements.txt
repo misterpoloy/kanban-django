@@ -1,0 +1,6 @@
+Django==4.2
+graphene-django==3.0.0
+boto3==1.28.0
+dynamodb-json==1.4.2
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.2.2
