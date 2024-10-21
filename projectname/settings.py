@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
 ROOT_URLCONF = 'projectname.urls'
@@ -73,6 +76,31 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'projectname.wsgi.application'
 
+# CORS Configuration
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+]
+CSRF_COOKIE_HTTPONLY = False  # Allows access to the CSRF cookie via JavaScript
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React development server
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# Optional: Allow all headers for CORS requests
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'authorization',
+    'x-requested-with',
+]
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

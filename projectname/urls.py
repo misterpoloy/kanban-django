@@ -17,15 +17,22 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from graphene_django.views import GraphQLView
+from django.http import JsonResponse 
+from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
 
+def test_view(request):
+    print(f"Incoming request from: {request.headers.get('Origin')}")
+    return JsonResponse({"status": "ok"})
+
 urlpatterns = [
+    path('test/', test_view),
     path('admin/', admin.site.urls),  # Ensure this line exists
-    path('graphql/', GraphQLView.as_view(graphiql=True)),
+    path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

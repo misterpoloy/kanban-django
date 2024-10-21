@@ -96,37 +96,25 @@ class CreateCardMutation(graphene.Mutation):
     card = graphene.Field(CardType)
 
     def mutate(self, info, content, column_id):
-        print(f"Creating card with content: '{content}' in column: {column_id}")
-
         # Authenticate the user
         user = authenticate_user(info)
 
         # Ensure the column exists
         try:
             column = Column.objects.get(id=column_id)
-            print(f"Found column: {column.title}")
         except Column.DoesNotExist:
-            raise Exception(f"Column with id {column_id} does not exist")
+            raise Exception(f"Column with ID {column_id} does not exist")
 
-        # Create the new card
+        # Create the new card and associate it with the column
         try:
-            card = Card.objects.create(content=content)
-            print(f"Card created with ID: {card.id}")
+            card = Card.objects.create(content=content, column=column)
+            print(f"Card '{card.content}' created and added to column '{column.title}'")
+            return CreateCardMutation(card=card)
+
         except Exception as e:
-            print(f"Error creating card: {e}")
+            print(f"Error creating or adding card to column: {e}")
             raise Exception("Failed to create card")
 
-        # Add the card to the column's many-to-many field
-        try:
-            column.cards.add(card)
-            column.save()
-            print(f"Card '{card.content}' added to column '{column.title}'")
-        except Exception as e:
-            print(f"Error adding card to column: {e}")
-            raise Exception("Failed to add card to column")
-
-        # Return the created card
-        return CreateCardMutation(card=card)
 
 
 # Mutation: Update Card
@@ -172,12 +160,51 @@ class Query(graphene.ObjectType):
         user = authenticate_user(info)
         return Board.objects.filter(user=user)
 
+class MoveCardMutation(graphene.Mutation):
+    class Arguments:
+        card_id = graphene.ID(required=True)
+        new_column_id = graphene.ID(required=True)
+
+    card = graphene.Field(CardType)
+
+    def mutate(self, info, card_id, new_column_id):
+        try:
+            # Get the card and new column from the database
+            card = Card.objects.get(id=card_id)
+            new_column = Column.objects.get(id=new_column_id)
+
+            # Move the card to the new column
+            card.column = new_column
+            card.save()
+
+            return MoveCardMutation(card=card)
+        except Card.DoesNotExist:
+            raise Exception(f"Card with ID {card_id} not found")
+        except Column.DoesNotExist:
+            raise Exception(f"Column with ID {new_column_id} not found")
+
+class DeleteCardMutation(graphene.Mutation):
+    class Arguments:
+        card_id = graphene.ID(required=True)
+
+    success = graphene.Boolean()
+
+    def mutate(self, info, card_id):
+        try:
+            card = Card.objects.get(pk=card_id)
+            card.delete()
+            return DeleteCardMutation(success=True)
+        except Card.DoesNotExist:
+            raise Exception("Card not found")
+
 class Mutation(graphene.ObjectType):
     create_card = CreateCardMutation.Field()
     update_card = UpdateCardMutation.Field()
     delete_card = DeleteCardMutation.Field()
     create_column = CreateColumnMutation.Field()
+    move_card = MoveCardMutation.Field()
     delete_column = DeleteColumnMutation.Field()
+    delete_card = DeleteCardMutation.Field()
 
 # Define the schema
 schema = graphene.Schema(query=Query, mutation=Mutation)
