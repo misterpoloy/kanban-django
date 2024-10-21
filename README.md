@@ -5,6 +5,8 @@ This project implements a simple Kanban board backend using Django with GraphQL 
 
 **by Juan P. Ortiz**
 
+![Banner](./images/banner.png)
+
 ## Prerequisites  
 - Python 3.x installed on your machine.  
 - Virtual environment tool (venv).  
